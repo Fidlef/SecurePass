@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="A privacy-first local password strength analyzer and secure password generator.">
+    <title>SecurePass — Local password toolkit</title>
+    <link rel="icon" href="{{ url_for('static', filename='icon.svg') }}" type="image/svg+xml">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <script type="module" src="{{ url_for('static', filename='js/app.js') }}"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header">
+      <a class="brand" href="/" aria-label="SecurePass home">
+        <span class="brand-mark" aria-hidden="true">S</span>
+        <span>SecurePass</span>
+      </a>
+      <div class="privacy-pill"><span aria-hidden="true">●</span> Runs locally</div>
+    </header>
+
+    <main id="main">
+      <section class="hero">
+        <div>
+          <p class="eyebrow">Privacy-first security tool</p>
+          <h1>Better passwords.<br><span>Zero uploads.</span></h1>
+          <p class="hero-copy">Analyze a password or create a strong one. Everything happens in your browser—nothing is sent, stored, or logged.</p>
+        </div>
+        <aside class="privacy-card" aria-label="Privacy architecture">
+          <div class="shield" aria-hidden="true">✓</div>
+          <div>
+            <strong>Your secrets stay on this device</strong>
+            <p>The page has no analytics, external requests, or password API. A strict security policy blocks network connections.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="tool-grid" aria-label="SecurePass tools">
+        <article class="panel analyzer-panel">
+          <div class="panel-heading">
+            <div>
+              <p class="step">01 / ANALYZE</p>
+              <h2>Check a password</h2>
+            </div>
+            <button class="text-button" id="load-demo" type="button">Use safe demo</button>
+          </div>
+
+          <label for="password-input">Password to analyze</label>
+          <div class="input-wrap">
+            <input id="password-input" type="password" autocomplete="new-password" autocapitalize="off" spellcheck="false" placeholder="Type or paste a password" aria-describedby="local-note">
+            <button class="icon-button" id="toggle-password" type="button" aria-label="Show password" aria-pressed="false">Show</button>
+          </div>
+          <p class="local-note" id="local-note">Processed only in this browser tab. Cleared when you close it.</p>
+
+          <div class="result" aria-live="polite">
+            <div class="score-line">
+              <div>
+                <span class="result-label">Strength</span>
+                <strong id="strength-label">Waiting for input</strong>
+              </div>
+              <div class="score-number"><span id="score-number">—</span><small>/ 4</small></div>
+            </div>
+            <div class="meter" aria-hidden="true"><span id="meter-fill"></span></div>
+            <div class="metrics">
+              <div><span>Estimated entropy</span><strong id="entropy-value">—</strong></div>
+              <div><span>Offline guess estimate</span><strong id="time-value">—</strong></div>
+            </div>
+            <div class="feedback">
+              <h3>What to improve</h3>
+              <ul id="feedback-list"><li>Enter a password to see practical feedback.</li></ul>
+            </div>
+          </div>
+        </article>
+
+        <article class="panel generator-panel">
+          <div class="panel-heading">
+            <div>
+              <p class="step">02 / GENERATE</p>
+              <h2>Create a password</h2>
+            </div>
+          </div>
+
+          <label for="generated-password">Generated password</label>
+          <div class="generated-output">
+            <output id="generated-password" for="length">Generating…</output>
+            <button class="copy-button" id="copy-password" type="button">Copy</button>
+          </div>
+
+          <div class="range-row">
+            <label for="length">Length</label>
+            <output id="length-value" for="length">20</output>
+          </div>
+          <input id="length" type="range" min="12" max="64" value="20">
+
+          <fieldset>
+            <legend>Character sets</legend>
+            <label class="check-row"><span>Uppercase <small>A–Z</small></span><input id="use-upper" type="checkbox" checked></label>
+            <label class="check-row"><span>Lowercase <small>a–z</small></span><input id="use-lower" type="checkbox" checked></label>
+            <label class="check-row"><span>Numbers <small>0–9</small></span><input id="use-number" type="checkbox" checked></label>
+            <label class="check-row"><span>Symbols <small>!@#$…</small></span><input id="use-symbol" type="checkbox" checked></label>
+          </fieldset>
+
+          <button class="primary-button" id="generate-password" type="button">Generate with secure randomness</button>
+          <p class="generator-note">Uses your browser’s cryptographic random-number generator with bias-free selection.</p>
+        </article>
+      </section>
+
+      <section class="how-it-works">
+        <p class="eyebrow">Transparent by design</p>
+        <h2>Simple security choices you can inspect</h2>
+        <div class="feature-grid">
+          <div><span>01</span><h3>Local analysis</h3><p>Your password never leaves the page. The server only delivers the app.</p></div>
+          <div><span>02</span><h3>Secure randomness</h3><p>Generation uses <code>crypto.getRandomValues</code>, not predictable <code>Math.random</code>.</p></div>
+          <div><span>03</span><h3>Honest estimates</h3><p>Strength and crack-time figures are educational estimates, not guarantees.</p></div>
+        </div>
+      </section>
+    </main>
+
+    <footer><span>SecurePass</span><span>Local by default · Open for inspection</span></footer>
+  </body>
+</html>
