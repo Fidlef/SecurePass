@@ -13,8 +13,9 @@ data the server could expose, store, or accidentally log.
 
 - `app.py` creates the Flask app, serves two read-only routes, and adds security
   headers. `connect-src 'none'` blocks JavaScript from making network requests.
-- `static/js/security.js` contains the strength checks, entropy estimate,
-  cryptographic random selection, and password generation logic.
+- `static/vendor/zxcvbn.js` is the locally bundled, pattern-aware estimator.
+- `static/js/security.js` adapts zxcvbn results, estimates search-space bits,
+  and contains the cryptographic random-selection and generation logic.
 - `static/js/app.js` connects that logic to the buttons, fields, meter, and
   accessibility messages in the interface.
 - `templates/index.html` contains the semantic page structure.
@@ -42,14 +43,13 @@ character set does not make some characters slightly more likely than others.
 ### 3. Why call the strength result an estimate?
 
 Password cracking depends on attack hardware, hashing, leaks, rate limits, and
-what an attacker knows about the person. SecurePass detects some obvious
-patterns and calculates an educational estimate, but it cannot prove that a
-password is safe.
+what an attacker knows about the person. zxcvbn models many practical patterns,
+but even an established estimator cannot prove that a password is safe.
 
 ## A truthful 30-second demo
 
 > SecurePass is an AI-assisted defensive cybersecurity project I reviewed and
-> tested. It analyzes password structure and generates passwords entirely in
+> tested. It uses a locally bundled zxcvbn estimator and generates passwords entirely in
 > the browser, so the Flask server never receives the secret. I used Web Crypto
 > instead of `Math.random`, added rejection sampling to avoid selection bias,
 > blocked outbound browser connections with a Content Security Policy, and
@@ -68,6 +68,6 @@ disclosure.
 4. Why are entropy and crack-time figures not guarantees?
 5. What would you improve next?
 
-A strong next improvement would be a locally bundled, mature estimator such as
-zxcvbn, followed by more browser-level accessibility and security tests. It
-should still run without sending the password to a remote API.
+A strong next improvement would be browser-level accessibility testing and an
+optional privacy-preserving compromised-password range check. Any network
+feature should be off by default and must never send the complete password.

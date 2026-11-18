@@ -11,6 +11,7 @@ function renderAnalysis() {
   byId("score-number").textContent = passwordInput.value ? result.score : "—";
   byId("entropy-value").textContent = passwordInput.value ? `≈ ${result.entropy} bits` : "—";
   byId("time-value").textContent = result.guessTime;
+  byId("method-value").textContent = result.method;
   meterFill.style.width = passwordInput.value ? `${(result.score + 1) * 20}%` : "0";
   meterFill.style.backgroundColor = colors[result.score];
   const list = byId("feedback-list");
@@ -19,6 +20,14 @@ function renderAnalysis() {
     li.textContent = item;
     return li;
   }));
+}
+
+function toggleTheme(event) {
+  const light = document.documentElement.dataset.theme !== "light";
+  document.documentElement.dataset.theme = light ? "light" : "dark";
+  event.currentTarget.textContent = light ? "Dark mode" : "Light mode";
+  event.currentTarget.setAttribute("aria-label", light ? "Switch to dark theme" : "Switch to light theme");
+  event.currentTarget.setAttribute("aria-pressed", String(light));
 }
 
 function selectedOptions() {
@@ -41,6 +50,7 @@ function refreshGeneratedPassword() {
 }
 
 passwordInput.addEventListener("input", renderAnalysis);
+byId("theme-toggle").addEventListener("click", toggleTheme);
 byId("load-demo").addEventListener("click", () => {
   passwordInput.value = "Demo!River-Quartz-47";
   renderAnalysis();

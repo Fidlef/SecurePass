@@ -44,51 +44,55 @@ function formatGuessTime(seconds) {
   return "less than a second";
 }
 
-export function analyzePassword(password) {
-  if (!password) {
-    return { score: 0, label: "Waiting for input", entropy: 0, guessTime: "—", feedback: ["Enter a password to see practical feedback."] };
-  }
-
+function fallbackEstimate(password) {
   const categories = [/[a-z]/.test(password), /[A-Z]/.test(password), /\d/.test(password), /[^A-Za-z0-9]/.test(password)];
   const poolSizes = [26, 26, 10, 28];
   const pool = categories.reduce((sum, present, index) => sum + (present ? poolSizes[index] : 0), 0);
   let entropy = password.length * Math.log2(Math.max(pool, 1));
   const lower = password.toLowerCase();
-  const feedback = [];
-
-  if (password.length < 12) feedback.push("Use at least 12 characters; 16 or more is safer for important accounts.");
-  if (categories.filter(Boolean).length < 3) feedback.push("Add a mix of uppercase, lowercase, numbers, or symbols—or use a long random passphrase.");
-
+  const suggestions = [];
+  let warning = "";
+  if (password.length < 12) suggestions.push("Use at least 12 characters; 16 or more is safer for important accounts.");
+  if (categories.filter(Boolean).length < 3) suggestions.push("Add a mix of character types or use a long random passphrase.");
   if (COMMON_PATTERNS.some((pattern) => lower.includes(pattern))) {
     entropy -= 28;
-    feedback.push("Avoid common words and well-known password patterns.");
+    warning = "This resembles a commonly used password.";
   }
-  if (/(.)\1{2,}/.test(password)) {
-    entropy -= 12;
-    feedback.push("Avoid repeated characters such as ‘aaa’ or ‘111’.");
-  }
-  if (hasSequence(password)) {
-    entropy -= 15;
-    feedback.push("Avoid keyboard, alphabet, and number sequences.");
-  }
-  if (/^(\w{1,6})\1+$/.test(password)) {
-    entropy -= 15;
-    feedback.push("Avoid repeating the same short block.");
-  }
-
+  if (/(.)\1{2,}/.test(password)) { entropy -= 12; suggestions.push("Avoid repeated characters."); }
+  if (hasSequence(password)) { entropy -= 15; suggestions.push("Avoid keyboard, alphabet, and number sequences."); }
   entropy = Math.max(0, Math.round(entropy));
   let score = 0;
   if (entropy >= 30 && password.length >= 8) score = 1;
   if (entropy >= 50 && password.length >= 10) score = 2;
   if (entropy >= 70 && password.length >= 12) score = 3;
   if (entropy >= 90 && password.length >= 16) score = 4;
+  return {
+    score,
+    guesses_log10: entropy / Math.log2(10),
+    crack_times_display: {offline_fast_hashing_1e10_per_second: formatGuessTime((2 ** Math.min(entropy, 1023)) / 10_000_000_000 / 2)},
+    feedback: {warning, suggestions},
+    calculation: "fallback",
+  };
+}
+
+export function analyzePassword(password, estimator = globalThis.zxcvbn) {
+  if (!password) {
+    return { score: 0, label: "Waiting for input", entropy: 0, guessTime: "—", feedback: ["Enter a password to see practical feedback."], method: "zxcvbn" };
+  }
+  const result = typeof estimator === "function" ? estimator(password) : fallbackEstimate(password);
+  const score = Math.max(0, Math.min(4, Number(result.score) || 0));
+  const entropy = Math.max(0, Math.round((Number(result.guesses_log10) || 0) * Math.log2(10)));
   const labels = ["Very weak", "Weak", "Fair", "Strong", "Very strong"];
-
-  if (feedback.length === 0) feedback.push("No obvious structural weakness found. Keep it unique and store it in a password manager.");
-  const guessesPerSecond = 10_000_000_000;
-  const guessSeconds = (2 ** Math.min(entropy, 1023)) / guessesPerSecond / 2;
-
-  return { score, label: labels[score], entropy, guessTime: formatGuessTime(guessSeconds), feedback };
+  const feedback = [result.feedback?.warning, ...(result.feedback?.suggestions || [])].filter(Boolean);
+  if (feedback.length === 0) feedback.push("No obvious pattern was found. Keep it unique and store it in a password manager.");
+  return {
+    score,
+    label: labels[score],
+    entropy,
+    guessTime: result.crack_times_display?.offline_fast_hashing_1e10_per_second || "unknown",
+    feedback,
+    method: result.calculation === "fallback" ? "fallback heuristic" : "zxcvbn",
+  };
 }
 
 export function secureRandomInt(maxExclusive, cryptoObject = globalThis.crypto) {

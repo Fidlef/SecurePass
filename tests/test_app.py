@@ -7,6 +7,8 @@ def test_home_page_loads():
     assert response.status_code == 200
     assert b"SecurePass" in response.data
     assert b"Zero uploads" in response.data
+    assert b"vendor/zxcvbn.js" in response.data
+    assert b"theme-toggle" in response.data
 
 
 def test_health_endpoint():

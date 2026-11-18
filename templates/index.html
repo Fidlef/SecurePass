@@ -7,6 +7,7 @@
     <title>SecurePass — Local password toolkit</title>
     <link rel="icon" href="{{ url_for('static', filename='icon.svg') }}" type="image/svg+xml">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <script src="{{ url_for('static', filename='vendor/zxcvbn.js') }}" defer></script>
     <script type="module" src="{{ url_for('static', filename='js/app.js') }}"></script>
   </head>
   <body>
@@ -17,6 +18,7 @@
         <span>SecurePass</span>
       </a>
       <div class="privacy-pill"><span aria-hidden="true">●</span> Runs locally</div>
+      <button class="theme-button" id="theme-toggle" type="button" aria-label="Switch to light theme" aria-pressed="false">Light mode</button>
     </header>
 
     <main id="main">
@@ -62,9 +64,10 @@
             </div>
             <div class="meter" aria-hidden="true"><span id="meter-fill"></span></div>
             <div class="metrics">
-              <div><span>Estimated entropy</span><strong id="entropy-value">—</strong></div>
+              <div><span>Estimated search space</span><strong id="entropy-value">—</strong></div>
               <div><span>Offline guess estimate</span><strong id="time-value">—</strong></div>
             </div>
+            <p class="method-note">Estimator: <strong id="method-value">zxcvbn</strong></p>
             <div class="feedback">
               <h3>What to improve</h3>
               <ul id="feedback-list"><li>Enter a password to see practical feedback.</li></ul>

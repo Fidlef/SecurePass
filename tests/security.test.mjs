@@ -15,6 +15,20 @@ test("common and sequential passwords are penalized", () => {
   assert.ok(weak.feedback.some((item) => item.includes("common")));
 });
 
+test("maps established estimator output into the dashboard model", () => {
+  const estimator = () => ({
+    score: 3,
+    guesses_log10: 12,
+    crack_times_display: { offline_fast_hashing_1e10_per_second: "2 minutes" },
+    feedback: { warning: "Synthetic warning", suggestions: ["Synthetic suggestion"] },
+  });
+  const result = analyzePassword("synthetic-value", estimator);
+  assert.equal(result.score, 3);
+  assert.equal(result.method, "zxcvbn");
+  assert.equal(result.guessTime, "2 minutes");
+  assert.deepEqual(result.feedback, ["Synthetic warning", "Synthetic suggestion"]);
+});
+
 test("generator includes every selected character set", () => {
   const password = generatePassword(32, { upper: true, lower: true, number: true, symbol: true });
   assert.equal(password.length, 32);
